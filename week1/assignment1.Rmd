@@ -1,0 +1,39 @@
+---
+title: "week1_assignment"
+author: "Hope (Amal) Jasentuliyana"
+date: "2023-09-04"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# obtaining and consolidating 538 primary data
+
+This data was used in the article [2022 Is Not Another 'Year Of The Woman'](https://fivethirtyeight.com/features/2022-women-candidates-data/)
+
+# code 
+```{r}
+republican_data <- read.csv("rep_candidates.csv")
+democrat_data <-  read.csv("dem_candidates.csv")
+# install.packages("dplyr")
+library(dplyr)
+glimpse(republican_data)
+
+#check which columns are in common
+(common_columns <- intersect(names(republican_data),names(democrat_data)))
+
+#append to a single dataframe
+
+rep_common_cols <- republican_data[,common_columns] %>% mutate(party ="republican")
+
+dem_common_cols <- democrat_data[,common_columns] %>% mutate(party ="democrat")
+
+both_party_data <- rbind(dem_common_cols,rep_common_cols)
+
+```
+
+# findings and reccomendations
+
+Given this data we can do analyses like looking at the win rate of women in primaries in democrat vs republican races.
