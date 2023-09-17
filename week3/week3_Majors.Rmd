@@ -1,0 +1,37 @@
+---
+title: "Data 607 Week3 Assignment"
+author: "Hope (Amal) Jasentuliyana"
+date: "2023-09-17"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Week 3
+
+```{r}
+library(dplyr)
+if (!requireNamespace("psych", quietly = TRUE)) {
+  install.packages("psych")
+}
+library(psych)
+
+dfMajors <-  read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv")
+describe(dfMajors)
+head(dfMajors)
+```
+there's one missing value in Major_Category
+```{r}
+dfMajors[is.na(dfMajors$Major_Category),]
+
+```
+## find majors that contain "DATA" or "STATISTICS"
+
+```{r}
+
+dfDataStatsMajors <- dfMajors[grep(".*(data|statistics).*",dfMajors$Major,ignore.case = TRUE),] # case insensitive search
+dfDataStatsMajors
+```
+
