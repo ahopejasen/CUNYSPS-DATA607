@@ -2,7 +2,9 @@
 title: "Data 607 Week3 Assignment"
 author: "Hope (Amal) Jasentuliyana"
 date: "2023-09-17"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -16,6 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(dplyr)
 library(knitr)
+library(stringr)
 if (!requireNamespace("psych", quietly = TRUE)) {
   install.packages("psych")
 }
@@ -80,7 +83,7 @@ describe(dfDataStatsMajors2)
 myVector <- myDF$foods
 
 
-### First  version I'm going to create a vector whose elements are strings which contain strings
+### First  version I'm going to create a vector whose elements are strings which start and end with doublequotes
 ```{r}
 foodVector  <- c("bell pepper"  ,"bilberry" ,    "blackberry"  , "blood orange",
  "blueberry"   , "cantaloupe" ,  "chili pepper" ,"cloudberry"  , "elderberry"  , "lime"    ,     "lychee"     ,  "mulberry"    ,
@@ -90,7 +93,7 @@ foodVector  <- c("bell pepper"  ,"bilberry" ,    "blackberry"  , "blood orange",
 quotedFoodVector <- str_c('"',foodVector,'"')
 quotedFoodVector
 ```
-### second  i'm going to flatten the data into a single string that contains the source code to create a vector in R:
+### second  i'm going to flatten the data into a single string that contains the source code to create the previous vector in R:
 ```{r}
 myFoodString <- str_c('c(' , str_c(quotedFoodVector,collapse = ', '), ')')
 
