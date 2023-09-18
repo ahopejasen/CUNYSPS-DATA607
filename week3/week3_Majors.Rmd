@@ -11,8 +11,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Week 3
 
+
+## Question 1.
 ```{r}
 library(dplyr)
+library(knitr)
 if (!requireNamespace("psych", quietly = TRUE)) {
   install.packages("psych")
 }
@@ -33,5 +36,109 @@ dfMajors[is.na(dfMajors$Major_Category),]
 
 dfDataStatsMajors <- dfMajors[grep(".*(data|statistics).*",dfMajors$Major,ignore.case = TRUE),] # case insensitive search
 dfDataStatsMajors
+
+xd <- dfDataStatsMajors$Major
+xd
 ```
 
+
+
+### that works for two keywords, but would be cumbersome with more.
+Here's one approach that might work better with thousands of keywords, and a large dataset but
+I can't get it to work:
+
+
+```{r}
+if (!requireNamespace("stringi")) {
+  install.packages("stringi")
+}
+
+library(stringi)
+
+myKeywords = c("data","statistics")
+dfMajors$lcMajor <- tolower(dfMajors$Major) # avoids overhead of case insensitive matching if we have many keywords
+hasKeyword <- function(field, keywords) {
+  any(stri_detect_fixed(field, keywords))
+} #retruns a vector of logicals
+
+majorsHaveKeywords <- sapply(dfMajors$lcMajor,hasKeyword, keywords=myKeywords )
+
+dfDataStatsMajors2 <- dfMajors[majorsHaveKeywords,]
+kable(dfDataStatsMajors2[,c("Major","Major_Category")], caption="Majors containing our keywords")  
+describe(dfDataStatsMajors2)
+
+
+
+
+
+
+```
+
+## 2 Write code that transforms the data below:
+
+### I don't understand the question.  I assume it's not asking for simple assignment like
+myVector <- myDF$foods
+
+
+### First  version I'm going to create a vector whose elements are strings which contain strings
+```{r}
+foodVector  <- c("bell pepper"  ,"bilberry" ,    "blackberry"  , "blood orange",
+ "blueberry"   , "cantaloupe" ,  "chili pepper" ,"cloudberry"  , "elderberry"  , "lime"    ,     "lychee"     ,  "mulberry"    ,
+ "olive"      ,  "salal berry")
+ #  make one flat string, each element gets a double quote prefix and suffix, and 
+# each element is separated by commas
+quotedFoodVector <- str_c('"',foodVector,'"')
+quotedFoodVector
+```
+### second  i'm going to flatten the data into a single string that contains the source code to create a vector in R:
+```{r}
+myFoodString <- str_c('c(' , str_c(quotedFoodVector,collapse = ', '), ')')
+
+
+writeLines(myFoodString)
+#check it with the desired result:
+myFoodString == 'c("bell pepper", "bilberry", "blackberry", "blood orange", "blueberry", "cantaloupe", "chili pepper", "cloudberry", "elderberry", "lime", "lychee", "mulberry", "olive", "salal berry")'
+```
+
+
+## 3 Describe, in words, what these expressions will match:
+
+* (.)\1\1
+The single backslash is eaten by the string before it gets to the reg-ex interpreter.
+
+I believe it matches octal ascii code \001, "start of header" which I can't find documented too well: [https://www.ascii-code.com/character/%E2%90%81](https://www.ascii-code.com/character/%E2%90%81)
+
+```{r}
+# "\1" == "\001"
+"\1" == "\001"
+```
+
+
+* "(.)(.)\\2\\1"
+
+This matches any two chars, followed by those characters in reverse order:
+"abba",  
+"1xx1",  
+"#&&#"  
+...etc
+
+* (..)\1  
+again the R string parser will interpret the single backslash as octal \001
+
+so this will match any two characters followed by \001
+
+* "(.).\\1.\\1"
+
+Any character, a second character, the first character, a third character, and the first character again:
+"a4aja"  
+"88888"  
+"&d&3&"  
+
+## 4 Construct regular expressions to match words that:
+
+* Start and end with the same character.
+  * "(.).*\\1"  
+* Contain a repeated pair of letters (e.g. "church" contains "ch" repeated twice.)
+  * "(..).*\\1"
+* Contain one letter repeated in at least three places (e.g. "eleven" contains three "e"s.)
+  * "(.).*\\1.*\\1"
