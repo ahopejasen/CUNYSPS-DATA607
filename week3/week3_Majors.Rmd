@@ -107,15 +107,19 @@ myFoodString == 'c("bell pepper", "bilberry", "blackberry", "blood orange", "blu
 ## 3 Describe, in words, what these expressions will match:
 
 * (.)\1\1
-The single backslash is eaten by the string before it gets to the reg-ex interpreter.
 
-I believe it matches octal ascii code \001, "start of header" which I can't find documented too well: [https://www.ascii-code.com/character/%E2%90%81](https://www.ascii-code.com/character/%E2%90%81)
+#### If that was put into quotes and passed as a string to str_view("(.)\1\1"):
+
+ The R parser will see \1 as ascii character code 001 and pass that as an argument to str_view90 so I believe it matches octal ascii code \001, "start of header" which I can't find documented too well: [https://www.ascii-code.com/character/%E2%90%81](https://www.ascii-code.com/character/%E2%90%81)
 
 ```{r}
 # "\1" == "\001"
 "\1" == "\001"
 ```
 
+#### On the other hand, if "(.)\\1\\1 was passed to  str_view() and once in the function it sees (.)\1\1 (ie: I put a break point in str_view and (.)\1\1 is the value of the parameter):
+
+this matches a character three times.  equivalent to (.){3}
 
 * "(.)(.)\\2\\1"
 
@@ -126,9 +130,17 @@ This matches any two chars, followed by those characters in reverse order:
 ...etc
 
 * (..)\1  
+
+#### if that's passed in quoted like str_view("(..)\1")
 again the R string parser will interpret the single backslash as octal \001
 
 so this will match any two characters followed by \001
+
+####  but if we pass it as "(..)\\1" and str_view() sees (..)\1
+
+then it matches  a character, a second character, then the first character, then the second:  
+abab
+d1d1
 
 * "(.).\\1.\\1"
 
@@ -136,6 +148,15 @@ Any character, a second character, the first character, a third character, and t
 "a4aja"  
 "88888"  
 "&d&3&"  
+
+
+* "(.)(.)(.).*\\3\\2\\1"  
+
+any three characters (they can be different or the same), zero or more characters, followed by the third, second, and first matched chars:  
+abccba
+abcsdfsjsdfjlcba
+
+
 
 ## 4 Construct regular expressions to match words that:
 
