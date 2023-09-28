@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Week 3 Project 1"
 author: "Hope (Amal) Jasentuliyana"
 date: "2023-09-27"
 output: pdf_document
@@ -9,22 +9,35 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+```{r}
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
 ```
 
-## Including Plots
+## Observations of csv datafile:
+### Record-level (line by line)
+* Every 4th line, starting at line 1 is dashes -----
+* The first four lines [1-4] can be discarded (headers and dashes)
+* Line 5 starts the data. Call this line n
+* Line n + 1 contains the State & pre-rating
+* Line n + 2 is dashes and can be discarded.
+* Line n + 4 will be the start of the next record
+* As above a record in a dataframe contains data from 2 lines from the csv
 
-You can also embed plots, for example:
+### first pass:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+Assuming there are no abberant records, it looks like I can:
+1. delete every 4th line
+2. join every odd line with the successive line (delete carriage return)
+3. separate on | and trim()  to get fields
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+### Field-level 
+
+1. Field 1: Player/pair number [will be used to join with other players to get average pre-rating of opponents]
+2. Field 2: Name  [text]
+3. Field 3: Rating [decimal, 1 digit after decimal]
+4. Field 4-10: {W,L,D}[:whitespace:]opponent_number. opponent_number is integer.
+5. Field 11: State. [A-Z]{2}.  [text]
+6. Field 12: [0-9]{8}\s+/R:\s+(\d){4}. pre-rating  [integer] 
+7. Fields 13-20: unused for this analysis
+
