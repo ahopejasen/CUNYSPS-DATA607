@@ -31,6 +31,78 @@ Assuming there are no abberant records, it looks like I can:
 3. separate on | and trim()  to get fields
 
 
+```{r}
+if (! require(readr)) {
+  install.packages("readr")
+  library(readr)
+}
+
+
+if (! require(stringr)) {
+  install.packages("stringr")
+  library(stringr)
+}
+
+if (! require(dplyr)) {
+  install.packages("dplyr")
+  library(dplyr)
+}
+if (! require(dplyr)) {
+  install.packages("dplyr")
+  library(dplyr)
+}
+df <- read_csv("./project1.txt", col_names = FALSE)
+df
+
+# I was going to use str_replace_all() to remove the dashes, but 
+# since it's a dataframe, I can filter mod(3) != 1.
+
+
+head(df)
+tail(df)
+
+#196 rows, which start and end on -----
+# after filtering I should have (2 * 196 / 3 )- 1  rows
+
+df2 <- df[1:nrow(df) %% 3 != 1, ]
+# OR using dplyr
+df3 <- df %>% filter(row_number() %% 3 != 1)
+
+stopifnot(nrow(df2) != (2 * nrow(df)/3 -1))
+
+
+#stopifnot(identical(df2,df3))  #assertion failed!
+stopifnot(nrow(setdiff(df2,df3)) == 0)
+
+#at this point, the dataframes have an equal number of rows, 
+#and the no rows in df2 are not also in df3.
+# since they aren't identical, the order must be different?
+
+
+
+
+head(df3)
+
+tail(df3)
+
+```
+
+At this point I am going to take a different approach and just do regex substitutions.
+
+```{r}
+myRegex = "^-+$"  # field consisting only of one or more dashes
+df4 <- df[!grepl("^-+$",df$X1),]
+
+stopifnot(nrow(df4)==nrow(df2))
+stopifnot(identical(df2,df4))
+
+View(df4)  #df2 an df4 have the same data. df3 may have  a different ordering.
+
+
+
+```
+
+
 ### Field-level 
 
 1. Field 1: Player/pair number [will be used to join with other players to get average pre-rating of opponents]
@@ -40,4 +112,5 @@ Assuming there are no abberant records, it looks like I can:
 5. Field 11: State. [A-Z]{2}.  [text]
 6. Field 12: [0-9]{8}\s+/R:\s+(\d){4}. pre-rating  [integer] 
 7. Fields 13-20: unused for this analysis
+
 
