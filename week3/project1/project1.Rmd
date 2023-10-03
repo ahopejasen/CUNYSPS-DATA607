@@ -111,16 +111,24 @@ View(df5)
 ```
 
 Now split on the "|" delimeter
+### Field-level  parsing
 
+1. Field 1: Player/pair number [will be used to join with other players to get average pre-rating of opponents]
+2. Field 2: Name  [text]
+3. Field 3: Rating [decimal, 1 digit after decimal]
+4. Field 4-10: [W,L,D]\s+(\d+) opponent_number. opponent_number is integer.
+5. Field 11: State. [A-Z]{2}.  [text]
+6. Field 12: [0-9]{8}\s+/R:\s+(\d){4} pre-rating  [integer] 
+7. Fields 13-20: unused for this analysis
 
 
 ```{r}
 library(tidyr)
 
 
-# following did not work due to a terminal delimeter "|"
+# the following did not work due to a terminal delimeter "|"
 if (FALSE) {
-newColNames <- c("playerNum",
+  newColNames <- c("playerNum",
                  "playerName",
                  "playerRating",
                  str_c("opponentOutcome",1:7),
@@ -132,7 +140,7 @@ newColNames <- c("playerNum",
 
 
 
-df5Split <- df5 %>% separate_wider_delim(X3,delim="|", 
+  df5Split <- df5 %>% separate_wider_delim(X3,delim="|", 
         names = newColNames,too_many="debug")
 }
 
@@ -150,16 +158,17 @@ df5Split <- df5 %>% separate_wider_delim(X3,delim="|",
        names = newColNames)
 ```
 
+Parse the opponent outcomes:
+
+```{r}
+
+colsToParse <- str_c("opponentOutcome",1:7)
+df5Split <- df5Split %>% mutate(across(starts_with("opponentOutcome"),
+            ~str_match(str_trim(.),"[W,L,D]\\s+(\\d+)")[,2] ))
+
+```
 
 
-### Field-level 
 
-1. Field 1: Player/pair number [will be used to join with other players to get average pre-rating of opponents]
-2. Field 2: Name  [text]
-3. Field 3: Rating [decimal, 1 digit after decimal]
-4. Field 4-10: {W,L,D}[:whitespace:]opponent_number. opponent_number is integer.
-5. Field 11: State. [A-Z]{2}.  [text]
-6. Field 12: [0-9]{8}\s+/R:\s+(\d){4}. pre-rating  [integer] 
-7. Fields 13-20: unused for this analysis
 
 
