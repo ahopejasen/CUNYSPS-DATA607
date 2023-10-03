@@ -98,9 +98,58 @@ stopifnot(identical(df2,df4))
 
 View(df4)  #df2 an df4 have the same data. df3 may have  a different ordering.
 
+# now concatenate even rows to odd ones.
+df4odd <- df4[1:nrow(df4) %% 2 == 1,]
+df4even <- df4[1:nrow(df4) %% 2 ==0,]
+df4even <- df4even %>% rename(X2 = X1)
+df5 <- cbind(df4odd,df4even)
 
+stopifnot(nrow(df5)== nrow(df4odd))
 
+df5 <- df5 %>% mutate(X3=paste0(X1,X2)) %>% select(X3)
+View(df5)
 ```
+
+Now split on the "|" delimeter
+
+
+
+```{r}
+library(tidyr)
+
+
+# following did not work due to a terminal delimeter "|"
+if (FALSE) {
+newColNames <- c("playerNum",
+                 "playerName",
+                 "playerRating",
+                 str_c("opponentOutcome",1:7),
+                 "State_Province",
+                 "preRating",
+                 str_c("unused",1:8)
+            
+                 )
+
+
+
+df5Split <- df5 %>% separate_wider_delim(X3,delim="|", 
+        names = newColNames,too_many="debug")
+}
+
+newColNames <- c("playerNum",
+                 "playerName",
+                 "playerRating",
+                 str_c("opponentOutcome",1:7),
+                 "State_Province",
+                 "preRating",
+                 str_c("unused",1:8),
+                "terminalDelimeter"
+                 )
+
+df5Split <- df5 %>% separate_wider_delim(X3,delim="|", 
+       names = newColNames)
+```
+
 
 
 ### Field-level 
