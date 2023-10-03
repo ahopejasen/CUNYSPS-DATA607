@@ -181,12 +181,21 @@ Now for each row and opponent we need to join the opponent outcome to the pre ra
 Or if we get a vector of opponent numbers, we could get the average pre-rating of matching opponents. 
 
 ```{r}
+#the join below was failing due to spaces in the playerNum
+df5Split3$playerNum <- trimws(df5Split3$playerNum, which = "both")
+
 finalDf <- df5Split3 %>% rowwise() %>% mutate( avgOpponentRating = {
   opponentIDs <- c(across(starts_with("opponentOutcome"))) #vector of IDs
-  opponentRatings <- as.numeric(df5Split3$preRating[match(opponentIDs,
-                                         df5Split3$playerNum)])
+  opponentRatings <- df5Split3$preRating[match(opponentIDs,
+                                         df5Split3$playerNum)]
+  opponentRatings <- as.numeric(opponentRatings)
   mean(opponentRatings,na.rm=TRUE)
-})
+  
+}) %>% ungroup()
+View(finalDf)
+
+
+
 ```
 
-
+Final cleaning and saving goes here.
