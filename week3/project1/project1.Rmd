@@ -118,7 +118,7 @@ Now split on the "|" delimeter
 3. Field 3: Rating [decimal, 1 digit after decimal]
 4. Field 4-10: [W,L,D]\s+(\d+) opponent_number. opponent_number is integer.
 5. Field 11: State. [A-Z]{2}.  [text]
-6. Field 12: [0-9]{8}\s+/R:\s+(\d){4} pre-rating  [integer] 
+6. Field 12: [0-9]{8}\s+/R:\s+(\d+) pre-rating  [integer] 
 7. Fields 13-20: unused for this analysis
 
 
@@ -162,9 +162,15 @@ Parse the opponent outcomes:
 
 ```{r}
 
-colsToParse <- str_c("opponentOutcome",1:7)
-df5Split <- df5Split %>% mutate(across(starts_with("opponentOutcome"),
+
+df5Split2 <- df5Split %>% mutate(across(starts_with("opponentOutcome"),
             ~str_match(str_trim(.),"[W,L,D]\\s+(\\d+)")[,2] ))
+
+df5Split3 <- df5Split2 %>% 
+    mutate(preRating = str_match(preRating,
+                "\\d+\\s+/\\s+R:\\s+(\\d+)\\D")[,2])
+
+
 
 ```
 
