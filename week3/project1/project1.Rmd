@@ -170,11 +170,23 @@ df5Split3 <- df5Split2 %>%
     mutate(preRating = str_match(preRating,
                 "\\d+\\s+/\\s+R:\\s+(\\d+)\\D")[,2])
 
-
+# remove the header row
+df5Split3 <- df5Split3[2:nrow(df5Split),]
 
 ```
 
+Now for each row and opponent we need to join the opponent outcome to the pre rating of the opponent.
 
 
+Or if we get a vector of opponent numbers, we could get the average pre-rating of matching opponents. 
+
+```{r}
+finalDf <- df5Split3 %>% rowwise() %>% mutate( avgOpponentRating = {
+  opponentIDs <- c(across(starts_with("opponentOutcome"))) #vector of IDs
+  opponentRatings <- as.numeric(df5Split3$preRating[match(opponentIDs,
+                                         df5Split3$playerNum)])
+  mean(opponentRatings,na.rm=TRUE)
+})
+```
 
 
