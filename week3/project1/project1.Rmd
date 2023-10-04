@@ -112,7 +112,7 @@ View(df5)
 
 Now split on the "|" delimeter
 ### Field-level  parsing
-
+```
 1. Field 1: Player/pair number [will be used to join with other players to get average pre-rating of opponents]
 2. Field 2: Name  [text]
 3. Field 3: Rating [decimal, 1 digit after decimal]
@@ -120,7 +120,7 @@ Now split on the "|" delimeter
 5. Field 11: State. [A-Z]{2}.  [text]
 6. Field 12: [0-9]{8}\s+/R:\s+(\d+) pre-rating  [integer] 
 7. Fields 13-20: unused for this analysis
-
+```
 
 ```{r}
 library(tidyr)
@@ -199,3 +199,18 @@ View(finalDf)
 ```
 
 Final cleaning and saving goes here.
+
+```{r}
+DfToSave <- finalDf %>%  mutate(avgOpponentRating = round(avgOpponentRating,0)) %>%  select(
+  `Player's Name` = playerName,
+   `Player's State` =State_Province,
+   `Total Number of Points` = playerRating, #this col was misnamed
+   `Player's Pre-Rating` = preRating,
+   `Average Pre Chess Rating of Opponents` = avgOpponentRating
+   ) %>%  mutate(
+      across(where(is.character), ~str_trim(.)) #trim all char fields
+      ) 
+
+write_csv(DfToSave,"./project1_output.csv")
+```
+
