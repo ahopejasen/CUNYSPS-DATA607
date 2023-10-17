@@ -1,0 +1,119 @@
+---
+title: "CUNYSPS-Data607-week5"
+author: "Hope Jasentuliyana"
+date: "2023-10-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## dump of sample data from mySql
+```sql
+--
+-- Table structure for table `flight_delays`
+--
+
+/* DROP TABLE IF EXISTS `flight_delays`; */
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `flight_delays` (
+  `idflight_delays` int NOT NULL AUTO_INCREMENT,
+  `airline_name` varchar(45) NOT NULL,
+  `delay_status` varchar(45) NOT NULL,
+  `Los Angeles` int NOT NULL,
+  `Phoenix` int NOT NULL,
+  `San Diego` int NOT NULL,
+  `San Franciso` int NOT NULL,
+  `Seattle` int NOT NULL,
+  PRIMARY KEY (`idflight_delays`),
+  KEY `Airline_name` (`airline_name`),
+  KEY `Delay_status` (`delay_status`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `flight_delays`
+--
+
+LOCK TABLES `flight_delays` WRITE;
+/*!40000 ALTER TABLE `flight_delays` DISABLE KEYS */;
+INSERT INTO `flight_delays` VALUES (1,'ALASKA','on time',497,221,212,503,1841),(2,'ALASKA','delayed',62,12,20,102,305),(3,'AM WEST','on time',694,4840,383,320,201),(4,'AM WEST','delayed',117,415,65,129,61);
+/*!40000 ALTER TABLE `flight_delays` ENABLE KEYS */;
+UNLOCK TABLES;
+
+```
+## read data into a dataframe
+
+```{r}
+library(DBI)
+library(dbplyr)
+library(tidyverse)
+library(RMariaDB)
+library(glue)
+
+# mysql user and pass set in environment vars
+# use Sys.setenv() to manualy set user and password in current R session
+db_user <- Sys.getenv("DB_USER")
+db_pass <- Sys.getenv("DB_PASS")
+con <- DBI::dbConnect(
+  RMariaDB::MariaDB(),
+  user = db_user,
+  password = db_pass,
+  host = "localhost",
+  dbname = "DATA607_WEEK5"
+)
+table_name <- "flight_delays"
+qry <- glue("SELECT * FROM {table_name}")
+df <- dbGetQuery(conn = con, qry)
+View(df)
+```
+
+## tidy data
+
+All cols not in c(idflight_delays, airline_name, delay_status) need to be put into a long format with names_to="city", values_to="delay"
+
+```{r}
+df_long <- df %>%
+  pivot_longer(
+    cols = !c(idflight_delays, airline_name, delay_status),
+    names_to = "city",
+    values_to = "count_delayed",
+    values_drop_na = TRUE
+  )
+```
+
+## compare ALASKA and AM WEST
+### group on airline and summarize sums
+
+```{r}
+df_summary <- df_long %>% 
+  group_by(airline_name,delay_status) %>% 
+  summarise(total_count=sum(count_delayed)) %>% 
+  ungroup()
+```
+
+## compare airlines
+### prepare contingency table
+```{r}
+contingency_table <- with(df_summary,xtabs(
+  total_count ~ airline_name + delay_status
+))
+
+percent_delayed <-df_summary %>% 
+  pivot_wider(names_from = delay_status,
+              values_from = total_count) %>% 
+  mutate(percent_delayed = delayed / (delayed + `on time`))
+contingency_table
+percent_delayed
+```
+
+13% of Alaska flights were delayed, compared to 11% of AM WEST flights.
+
+### check chi-sq
+```{r}
+
+chisq_result <- chisq.test(contingency_table)
+chisq_result
+```
+The differences are statistically significant.
